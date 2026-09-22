@@ -15,146 +15,104 @@ button{font:inherit}
 }
 .brand{display:flex;align-items:center;gap:18px}
 .brandIcon{width:64px;height:64px;border-radius:20px;background:#34c9ce;color:#647f86;display:grid;place-items:center}
-.brandTitle{font-size:28px;letter-spacing:.12em;font-weight:500;line-height:1}
-.brandSub{font-size:15px;letter-spacing:.16em;color:#81949f;margin-top:10px}
-.headerActions{display:flex;align-items:center;gap:28px;color:#84949e;font-size:16px}
-.headerActions button{height:60px;padding:0 21px;border-radius:16px;border:1px solid #29414f;background:#0c1d27;color:#eef5f7;display:flex;align-items:center;gap:12px;font-weight:500;font-size:17px}
+.brandTitle{font-size:24px;letter-spacing:.12em;font-weight:500;line-height:1}
+.brandSub{font-size:13px;letter-spacing:.16em;color:#81949f;margin-top:9px}
+.headerActions{display:flex;align-items:center;gap:28px;color:#84949e;font-size:14px}
+.headerActions button{height:60px;padding:0 21px;border-radius:16px;border:1px solid #29414f;background:#0c1d27;color:#eef5f7;display:flex;align-items:center;gap:12px;font-weight:500;font-size:15px}
 .spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 
 .content{padding:44px 19px 28px}
-.error{max-width:2015px;margin:0 auto 18px;padding:14px 18px;border:1px solid #75463f;background:#271916;border-radius:14px;font-size:15px}
+.error{max-width:2015px;margin:0 auto 18px;padding:14px 18px;border:1px solid #75463f;background:#271916;border-radius:14px;font-size:13px}
 .paddleCard{min-height:216px;border-radius:28px;border:1px solid #18717a;background:linear-gradient(90deg,#0d3a40 0%,#0e2833 43%,#0b1f29 100%);display:flex;align-items:center;gap:29px;padding:38px 36px;max-width:2015px;margin:0 auto 27px}
 .paddleIcon{width:86px;height:86px;border-radius:50%;background:#34c9ce;color:#06131b;display:grid;place-items:center;flex:0 0 auto}
-.paddleCard span,.sectionHead span,.chartHeader span{color:#36cbd1;font-size:16px;font-weight:800;letter-spacing:.14em}
-.paddleCard h2{font-size:31px;font-weight:500;margin:18px 0 10px;letter-spacing:-.02em}
-.paddleCard p{margin:0;color:#9cadb6;font-size:20px;line-height:1.5;max-width:1160px}
+.paddleCard span,.sectionHead span,.chartHeader span{color:#36cbd1;font-size:14px;font-weight:750;letter-spacing:.14em}
+.paddleCard h2{font-size:27px;font-weight:500;margin:18px 0 10px;letter-spacing:-.02em}
+.paddleCard p{margin:0;color:#9cadb6;font-size:17px;line-height:1.5;max-width:1160px}
 
 .metricGrid{max-width:2015px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:26px}
 .metricCard{height:254px;border-radius:27px;border:1px solid #263e4b;background:#0d202b;padding:29px 29px 26px;display:flex;flex-direction:column}
 .metricTop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-.metricLabel{display:flex;align-items:center;gap:15px;font-size:15px;letter-spacing:.08em;font-weight:800;color:#8a9ba5;line-height:1.5}
+.metricLabel{display:flex;align-items:center;gap:15px;font-size:13px;letter-spacing:.08em;font-weight:750;color:#8a9ba5;line-height:1.5}
 .metricLabel.cyan svg{color:#31d3d4}.metricLabel.amber svg{color:#f8bf4f}.metricLabel.blue svg{color:#77a9ff}.metricLabel.violet svg{color:#b381ff}
-.metricTop em{font-style:normal;border:1px solid #276354;border-radius:7px;color:#68e4ba;font-size:12px;letter-spacing:.08em;padding:7px 9px}
-.metricValue{font-size:50px;font-weight:750;letter-spacing:-.05em;margin:33px 0 17px;line-height:1}
-.metricValue small{font-size:23px;color:#80909a;font-weight:500;letter-spacing:0}
-.metricValue.word{font-size:50px}
-.metricCard p{margin:auto 0 0;color:#84949e;font-size:17px;line-height:1.5}
+.metricTop em{font-style:normal;border:1px solid #276354;border-radius:7px;color:#68e4ba;font-size:10px;letter-spacing:.08em;padding:7px 9px}
+.metricValue{font-size:42px;font-weight:700;letter-spacing:-.045em;margin:33px 0 17px;line-height:1}
+.metricValue small{font-size:19px;color:#80909a;font-weight:500;letter-spacing:0}
+.metricValue.word{font-size:42px}
+.metricCard p{margin:auto 0 0;color:#84949e;font-size:14px;line-height:1.5}
 
 .chartGrid{max-width:2015px;margin:28px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:26px}
 .chartCard{height:531px;border-radius:28px;border:1px solid #263e4b;background:#0d202b;padding:39px 32px 24px}
 .chartHeader{display:flex;align-items:flex-start;justify-content:space-between}
-.chartHeader h2,.sectionHead h2{font-size:31px;font-weight:500;margin:18px 0 0;letter-spacing:-.02em}
+.chartHeader h2,.sectionHead h2{font-size:27px;font-weight:500;margin:18px 0 0;letter-spacing:-.02em}
 .rangeToggle{display:flex;align-items:center;border:1px solid #274250;border-radius:14px;background:#0a1b25;padding:5px}
-.rangeToggle button{border:0;background:transparent;color:#83939e;padding:13px 17px;border-radius:10px;font-size:17px;cursor:pointer}
+.rangeToggle button{border:0;background:transparent;color:#83939e;padding:13px 17px;border-radius:10px;font-size:14px;cursor:pointer}
 .rangeToggle button.active{background:#253d49;color:#f0f5f7}
 .plot{height:342px;margin-top:17px;position:relative}
 .plot svg{width:100%;height:300px;overflow:visible}
 .gridline{stroke:#2a414c;stroke-width:.55;vector-effect:non-scaling-stroke}
-.axis{fill:#748791;font-size:3.1px}
+.axis{fill:#748791;font-size:2.65px}
 .chartLine{fill:none;stroke-width:4;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
 .chartLine.cyan{stroke:#38ced0}.chartLine.amber{stroke:#f7be54}
 .stop.cyan{stop-color:#35c9cc;stop-opacity:.18}.stop.amber{stop-color:#f7be54;stop-opacity:.24}.stop.end{stop-color:#0d202b;stop-opacity:0}
 .hoverLine{stroke:#bac4c9;stroke-width:1;vector-effect:non-scaling-stroke}
 .hoverDot{stroke:#f5f7f7;stroke-width:2;vector-effect:non-scaling-stroke}
 .hoverDot.cyan{fill:#38ced0}.hoverDot.amber{fill:#f7be54}
-.xTicks{position:absolute;left:5%;right:2%;bottom:3px;height:24px;color:#788a94;font-size:15px}
+.xTicks{position:absolute;left:5%;right:2%;bottom:3px;height:24px;color:#788a94;font-size:13px}
 .xTicks span{position:absolute;white-space:nowrap}
 .tooltip{position:absolute;top:70px;min-width:214px;background:#102737;border:1px solid #344c5a;border-radius:18px;padding:17px 16px;box-shadow:0 8px 28px rgba(0,0,0,.3);pointer-events:none}
-.tooltip b{display:block;font-size:19px;font-weight:500;margin-bottom:14px}
-.tooltip span{color:#f0bf59;font-size:18px}.tooltip strong{font-size:22px}
-.chartFoot{border-top:1px solid #1d3440;padding-top:16px;color:#748791;font-size:15px}
+.tooltip b{display:block;font-size:16px;font-weight:500;margin-bottom:14px}
+.tooltip span{color:#f0bf59;font-size:15px}.tooltip strong{font-size:19px}
+.chartFoot{border-top:1px solid #1d3440;padding-top:16px;color:#748791;font-size:13px}
 
 .bottomGrid{max-width:2015px;margin:28px auto 0;display:grid;grid-template-columns:1.58fr 1fr;gap:26px}
 .webcamCard,.weatherCard{min-height:630px;border-radius:28px;border:1px solid #263e4b;background:#0d202b;padding:39px 32px 31px}
 .sectionHead{display:flex;align-items:flex-start;justify-content:space-between}
-.updatePill{border:1px solid #263f4c;border-radius:13px;padding:12px 14px;color:#7e909a;font-size:15px}
+.updatePill{border:1px solid #263f4c;border-radius:13px;padding:12px 14px;color:#7e909a;font-size:13px}
 .webcamFrame{position:relative;margin-top:31px}
 .webcamFrame img{width:100%;height:422px;object-fit:cover;border-radius:17px;display:block;background:#081923}
-.webcamFrame a{position:absolute;right:18px;bottom:17px;display:flex;align-items:center;gap:8px;background:rgba(13,35,31,.92);border:1px solid #5a6f59;border-radius:12px;color:#eef5f7;text-decoration:none;font-size:16px;font-weight:700;padding:11px 14px}
-.webcamCard>p,.weatherCard>p{color:#718691;font-size:15px;margin:10px 0 0}
+.webcamFrame a{position:absolute;right:18px;bottom:17px;display:flex;align-items:center;gap:8px;background:rgba(13,35,31,.92);border:1px solid #5a6f59;border-radius:12px;color:#eef5f7;text-decoration:none;font-size:14px;font-weight:700;padding:11px 14px}
+.webcamCard>p,.weatherCard>p{color:#718691;font-size:13px;margin:10px 0 0}
 .forecastList{margin-top:30px}
 .forecastRow{height:55px;border-bottom:1px solid #273c47;display:grid;grid-template-columns:86px 48px 110px 1fr 110px;align-items:center;color:#dce6ea}
-.forecastRow b{font-size:16px}.forecastRow i{font-style:normal;font-size:21px}
-.temps{display:flex;align-items:baseline;gap:7px}.temps strong{font-size:17px}.temps span{font-size:14px;color:#7c8d97}
-.rain{color:#63a8ef;font-size:16px}.wind{justify-self:end;display:flex;gap:6px;align-items:center;color:#8798a2;font-size:15px}
-.footer{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#70858f;font-size:15px}
+.forecastRow b{font-size:14px}.forecastRow i{font-style:normal;font-size:19px}
+.temps{display:flex;align-items:baseline;gap:7px}.temps strong{font-size:15px}.temps span{font-size:12px;color:#7c8d97}
+.rain{color:#63a8ef;font-size:14px}.wind{justify-self:end;display:flex;gap:6px;align-items:center;color:#8798a2;font-size:13px}
+.footer{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#70858f;font-size:13px}
 
-/* Typography follows the original screenshot proportions at common desktop widths. */
 @media(max-width:1600px){
-  .brandTitle{font-size:22px}
-  .brandSub{font-size:12px}
-  .headerActions{font-size:14px}
-  .headerActions button{font-size:15px}
+  .brandTitle{font-size:22px}.brandSub{font-size:12px}
+  .headerActions{font-size:13px}.headerActions button{font-size:14px}
   .paddleCard span,.sectionHead span,.chartHeader span{font-size:13px}
-  .paddleCard h2{font-size:25px}
-  .paddleCard p{font-size:16px}
-  .metricLabel{font-size:12px}
-  .metricTop em{font-size:10px}
-  .metricValue,.metricValue.word{font-size:39px}
-  .metricValue small{font-size:18px}
-  .metricCard p{font-size:13px}
-  .chartHeader h2,.sectionHead h2{font-size:25px}
-  .rangeToggle button{font-size:14px}
-  .xTicks{font-size:12px}
-  .tooltip b{font-size:15px}
-  .tooltip span{font-size:14px}.tooltip strong{font-size:17px}
-  .chartFoot{font-size:12px}
-  .updatePill{font-size:12px}
-  .webcamFrame a{font-size:13px}
-  .webcamCard>p,.weatherCard>p{font-size:12px}
-  .forecastRow b{font-size:13px}
-  .forecastRow i{font-size:18px}
-  .temps strong{font-size:14px}.temps span{font-size:12px}
-  .rain{font-size:13px}.wind{font-size:12px}
-  .footer{font-size:12px}
+  .paddleCard h2{font-size:25px}.paddleCard p{font-size:16px}
+  .metricLabel{font-size:12px}.metricTop em{font-size:10px}
+  .metricValue,.metricValue.word{font-size:39px}.metricValue small{font-size:18px}.metricCard p{font-size:13px}
+  .chartHeader h2,.sectionHead h2{font-size:25px}.rangeToggle button{font-size:14px}
+  .xTicks{font-size:12px}.chartFoot{font-size:12px}
+  .updatePill{font-size:12px}.webcamFrame a{font-size:13px}.webcamCard>p,.weatherCard>p{font-size:12px}
+  .forecastRow b{font-size:13px}.forecastRow i{font-size:18px}.temps strong{font-size:14px}.temps span{font-size:12px}.rain{font-size:13px}.wind{font-size:12px}.footer{font-size:12px}
 }
 @media(max-width:1200px){
   .siteHeader{padding:0 28px}
-  .brandTitle{font-size:19px}
-  .brandSub{font-size:10px}
-  .headerActions{font-size:12px}
-  .headerActions button{font-size:13px}
+  .brandTitle{font-size:19px}.brandSub{font-size:10px}
+  .headerActions{font-size:12px}.headerActions button{font-size:13px}
   .paddleCard span,.sectionHead span,.chartHeader span{font-size:11px}
-  .paddleCard h2{font-size:21px}
-  .paddleCard p{font-size:14px}
-  .metricLabel{font-size:10px}
-  .metricTop em{font-size:9px}
-  .metricValue,.metricValue.word{font-size:32px}
-  .metricValue small{font-size:15px}
-  .metricCard p{font-size:11px}
-  .chartHeader h2,.sectionHead h2{font-size:21px}
-  .rangeToggle button{font-size:12px}
-  .xTicks{font-size:10px}
-  .chartFoot{font-size:10px}
-  .updatePill{font-size:10px}
-  .webcamFrame a{font-size:11px}
-  .webcamCard>p,.weatherCard>p{font-size:10px}
-  .forecastRow b{font-size:11px}.forecastRow i{font-size:16px}
-  .temps strong{font-size:12px}.temps span{font-size:10px}
-  .rain{font-size:11px}.wind{font-size:10px}
-  .footer{font-size:10px}
+  .paddleCard h2{font-size:21px}.paddleCard p{font-size:14px}
+  .metricLabel{font-size:10px}.metricTop em{font-size:9px}
+  .metricValue,.metricValue.word{font-size:32px}.metricValue small{font-size:15px}.metricCard p{font-size:11px}
+  .chartHeader h2,.sectionHead h2{font-size:21px}.rangeToggle button{font-size:12px}
+  .xTicks{font-size:10px}.chartFoot{font-size:10px}
+  .updatePill{font-size:10px}.webcamFrame a{font-size:11px}.webcamCard>p,.weatherCard>p{font-size:10px}
+  .forecastRow b{font-size:11px}.forecastRow i{font-size:16px}.temps strong{font-size:12px}.temps span{font-size:10px}.rain{font-size:11px}.wind{font-size:10px}.footer{font-size:10px}
 }
-@media(max-width:900px){
-  .metricGrid{grid-template-columns:repeat(2,1fr)}
-  .bottomGrid{grid-template-columns:1fr}
-}
+@media(max-width:900px){.metricGrid{grid-template-columns:repeat(2,1fr)}.bottomGrid{grid-template-columns:1fr}}
 @media(max-width:820px){
-  .siteHeader{height:auto;padding:20px;align-items:flex-start;gap:20px}
-  .headerActions{flex-direction:column;align-items:flex-end;gap:10px}
-  .content{padding:22px 12px}
-  .paddleCard{min-height:0;padding:24px 20px}
-  .metricGrid,.chartGrid{grid-template-columns:1fr}
-  .chartCard{height:500px}
-  .webcamCard,.weatherCard{min-height:0}
+  .siteHeader{height:auto;padding:20px;align-items:flex-start;gap:20px}.headerActions{flex-direction:column;align-items:flex-end;gap:10px}
+  .content{padding:22px 12px}.paddleCard{min-height:0;padding:24px 20px}.metricGrid,.chartGrid{grid-template-columns:1fr}.chartCard{height:500px}.webcamCard,.weatherCard{min-height:0}
   .footer{height:auto;padding:18px;gap:12px;flex-direction:column;align-items:flex-start}
 }
 @media(max-width:520px){
-  .brandIcon{width:52px;height:52px;border-radius:16px}.brandTitle{font-size:18px}.headerActions>span{display:none}
-  .headerActions button{height:48px;padding:0 14px;font-size:13px}
-  .paddleIcon{width:66px;height:66px}.paddleCard{gap:18px}
-  .metricGrid{gap:14px}.metricCard{height:230px;padding:23px}.metricValue,.metricValue.word{font-size:32px}
-  .chartGrid,.bottomGrid{gap:14px}.chartCard{padding:25px 18px;height:460px}.chartHeader h2,.sectionHead h2{font-size:21px}
-  .rangeToggle button{font-size:12px;padding:10px}.plot{height:300px}.plot svg{height:260px}
-  .webcamCard,.weatherCard{padding:25px 18px}.webcamFrame img{height:280px}
-  .forecastRow{grid-template-columns:55px 36px 88px 1fr 86px}
+  .brandIcon{width:52px;height:52px;border-radius:16px}.brandTitle{font-size:18px}.headerActions>span{display:none}.headerActions button{height:48px;padding:0 14px;font-size:13px}
+  .paddleIcon{width:66px;height:66px}.paddleCard{gap:18px}.metricGrid{gap:14px}.metricCard{height:230px;padding:23px}.metricValue,.metricValue.word{font-size:32px}
+  .chartGrid,.bottomGrid{gap:14px}.chartCard{padding:25px 18px;height:460px}.chartHeader h2,.sectionHead h2{font-size:21px}.rangeToggle button{font-size:12px;padding:10px}.plot{height:300px}.plot svg{height:260px}
+  .webcamCard,.weatherCard{padding:25px 18px}.webcamFrame img{height:280px}.forecastRow{grid-template-columns:55px 36px 88px 1fr 86px}
 }
