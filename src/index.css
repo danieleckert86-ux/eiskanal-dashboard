@@ -18,17 +18,17 @@ button{font:inherit}
   width:64px;height:64px;border-radius:20px;background:#34c9ce;color:#647f86;
   display:grid;place-items:center;
 }
-.brandTitle{font-size:28px;letter-spacing:.12em;font-weight:500;line-height:1}
+.brandTitle{font-size:27px;letter-spacing:.12em;font-weight:500;line-height:1}
 .brandSub{font-size:15px;letter-spacing:.16em;color:#81949f;margin-top:10px}
 .headerActions{display:flex;align-items:center;gap:28px;color:#84949e;font-size:16px}
 .headerActions button{
   height:60px;padding:0 21px;border-radius:16px;border:1px solid #29414f;background:#0c1d27;
-  color:#eef5f7;display:flex;align-items:center;gap:12px;font-weight:500;
+  color:#eef5f7;display:flex;align-items:center;gap:12px;font-weight:500;font-size:17px;
 }
 .spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 
 .content{padding:44px 19px 28px}
-.error{max-width:2015px;margin:0 auto 18px;padding:14px 18px;border:1px solid #75463f;background:#271916;border-radius:14px}
+.error{max-width:2015px;margin:0 auto 18px;padding:14px 18px;border:1px solid #75463f;background:#271916;border-radius:14px;font-size:15px}
 
 .paddleCard{
   min-height:216px;border-radius:28px;border:1px solid #18717a;
@@ -39,9 +39,9 @@ button{font:inherit}
   width:86px;height:86px;border-radius:50%;background:#34c9ce;color:#06131b;display:grid;place-items:center;flex:0 0 auto;
 }
 .paddleCard span,.sectionHead span,.chartHeader span{
-  color:#36cbd1;font-size:16px;font-weight:800;letter-spacing:.14em;
+  color:#36cbd1;font-size:15px;font-weight:800;letter-spacing:.14em;
 }
-.paddleCard h2{font-size:31px;font-weight:500;margin:18px 0 10px;letter-spacing:-.02em}
+.paddleCard h2{font-size:30px;font-weight:500;margin:18px 0 10px;letter-spacing:-.02em}
 .paddleCard p{margin:0;color:#9cadb6;font-size:20px;line-height:1.5;max-width:1160px}
 
 .metricGrid{
@@ -57,10 +57,10 @@ button{font:inherit}
 .metricTop em{
   font-style:normal;border:1px solid #276354;border-radius:7px;color:#68e4ba;font-size:12px;letter-spacing:.08em;padding:7px 9px;
 }
-.metricValue{font-size:50px;font-weight:750;letter-spacing:-.05em;margin:33px 0 17px}
-.metricValue small{font-size:23px;color:#80909a;font-weight:500;letter-spacing:0}
-.metricValue.word{font-size:50px}
-.metricCard p{margin:auto 0 0;color:#84949e;font-size:17px;line-height:1.5}
+.metricValue{font-size:49px;font-weight:750;letter-spacing:-.05em;margin:33px 0 17px;line-height:1}
+.metricValue small{font-size:22px;color:#80909a;font-weight:500;letter-spacing:0}
+.metricValue.word{font-size:49px}
+.metricCard p{margin:auto 0 0;color:#84949e;font-size:16px;line-height:1.5}
 
 .chartGrid{
   max-width:2015px;margin:28px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:26px;
@@ -69,18 +69,18 @@ button{font:inherit}
   height:531px;border-radius:28px;border:1px solid #263e4b;background:#0d202b;padding:39px 32px 24px;
 }
 .chartHeader{display:flex;align-items:flex-start;justify-content:space-between}
-.chartHeader h2,.sectionHead h2{font-size:31px;font-weight:500;margin:18px 0 0;letter-spacing:-.02em}
+.chartHeader h2,.sectionHead h2{font-size:30px;font-weight:500;margin:18px 0 0;letter-spacing:-.02em}
 .rangeToggle{
   display:flex;align-items:center;border:1px solid #274250;border-radius:14px;background:#0a1b25;padding:5px;
 }
 .rangeToggle button{
-  border:0;background:transparent;color:#83939e;padding:13px 17px;border-radius:10px;font-size:17px;cursor:pointer;
+  border:0;background:transparent;color:#83939e;padding:13px 17px;border-radius:10px;font-size:16px;cursor:pointer;
 }
 .rangeToggle button.active{background:#253d49;color:#f0f5f7}
 .plot{height:342px;margin-top:17px;position:relative}
 .plot svg{width:100%;height:300px;overflow:visible}
 .gridline{stroke:#2a414c;stroke-width:.55;vector-effect:non-scaling-stroke}
-.axis{fill:#748791;font-size:3.1px}
+.axis{fill:#748791;font-size:3px}
 .chartLine{fill:none;stroke-width:4;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
 .chartLine.cyan{stroke:#38ced0}.chartLine.amber{stroke:#f7be54}
 .stop.cyan{stop-color:#35c9cc;stop-opacity:.18}.stop.amber{stop-color:#f7be54;stop-opacity:.24}.stop.end{stop-color:#0d202b;stop-opacity:0}
@@ -93,9 +93,9 @@ button{font:inherit}
   position:absolute;top:70px;min-width:214px;background:#102737;border:1px solid #344c5a;border-radius:18px;
   padding:17px 16px;box-shadow:0 8px 28px rgba(0,0,0,.3);pointer-events:none;
 }
-.tooltip b{display:block;font-size:19px;font-weight:500;margin-bottom:14px}
-.tooltip span{color:#f0bf59;font-size:18px}.tooltip strong{font-size:22px}
-.chartFoot{border-top:1px solid #1d3440;padding-top:16px;color:#748791;font-size:15px}
+.tooltip b{display:block;font-size:18px;font-weight:500;margin-bottom:14px}
+.tooltip span{color:#f0bf59;font-size:17px}.tooltip strong{font-size:21px}
+.chartFoot{border-top:1px solid #1d3440;padding-top:16px;color:#748791;font-size:14px}
 
 .bottomGrid{
   max-width:2015px;margin:28px auto 0;display:grid;grid-template-columns:1.58fr 1fr;gap:26px;
@@ -112,19 +112,19 @@ button{font:inherit}
   background:rgba(13,35,31,.92);border:1px solid #5a6f59;border-radius:12px;color:#eef5f7;
   text-decoration:none;font-size:16px;font-weight:700;padding:11px 14px;
 }
-.webcamCard>p,.weatherCard>p{color:#718691;font-size:15px;margin:10px 0 0}
+.webcamCard>p,.weatherCard>p{color:#718691;font-size:14px;margin:10px 0 0}
 
 .forecastList{margin-top:30px}
 .forecastRow{
   height:55px;border-bottom:1px solid #273c47;display:grid;
   grid-template-columns:86px 48px 110px 1fr 110px;align-items:center;color:#dce6ea;
 }
-.forecastRow b{font-size:16px}.forecastRow i{font-style:normal;font-size:21px}
-.temps{display:flex;align-items:baseline;gap:7px}.temps strong{font-size:17px}.temps span{font-size:14px;color:#7c8d97}
+.forecastRow b{font-size:16px}.forecastRow i{font-style:normal;font-size:20px}
+.temps{display:flex;align-items:baseline;gap:7px}.temps strong{font-size:16px}.temps span{font-size:14px;color:#7c8d97}
 .rain{color:#63a8ef;font-size:16px}.wind{justify-self:end;display:flex;gap:6px;align-items:center;color:#8798a2;font-size:15px}
 
 .footer{
-  height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#70858f;font-size:15px;
+  height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#70858f;font-size:14px;
 }
 
 @media(max-width:1200px){
@@ -146,7 +146,7 @@ button{font:inherit}
 }
 @media(max-width:520px){
   .brandIcon{width:52px;height:52px;border-radius:16px}.brandTitle{font-size:21px}.headerActions>span{display:none}
-  .headerActions button{height:48px;padding:0 14px}
+  .headerActions button{height:48px;padding:0 14px;font-size:15px}
   .paddleIcon{width:66px;height:66px}.paddleCard{gap:18px}
   .metricGrid{gap:14px}.metricCard{height:230px;padding:23px}.metricValue{font-size:44px}
   .chartGrid,.bottomGrid{gap:14px}.chartCard{padding:25px 18px;height:460px}.chartHeader h2,.sectionHead h2{font-size:25px}
