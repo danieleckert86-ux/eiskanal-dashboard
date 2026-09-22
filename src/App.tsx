@@ -1,135 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Cloud, Droplets, RefreshCw, ShieldCheck, Sun, Thermometer, Waves, Wind } from 'lucide-react';
+import { CloudRain, Droplets, ExternalLink, RefreshCw, Shirt, ThermometerSun, Waves, Wind } from 'lucide-react';
 
-type Level = 'VERY_WARM' | 'WARM' | 'MILD' | 'FRESH' | 'COOL' | 'COLD' | 'VERY_COLD' | 'ICY';
-type SunMode = 'cloudy' | 'partly' | 'sunny';
-type Warmth = 'cold' | 'normal' | 'warm';
-type Conditions = { waterTemp:number; waterTime:string; airTemp:number; windSpeed:number; cloudCover:number; sunMode:SunMode; weatherTime:string };
-
-const order: Level[] = ['VERY_WARM','WARM','MILD','FRESH','COOL','COLD','VERY_COLD','ICY'];
-const labels: Record<Level,string> = { VERY_WARM:'Sehr warm', WARM:'Warm', MILD:'Mild', FRESH:'Frisch', COOL:'Kühl', COLD:'Kalt', VERY_COLD:'Sehr kalt', ICY:'Eisig' };
-const clothes: Record<Level,{main:string[];optional:string[]}> = {
-  VERY_WARM:{main:[],optional:['Neoprenshirt kurzarm']},
-  WARM:{main:['Neoprenshirt kurzarm'],optional:[]},
-  MILD:{main:['Neoprenshirt Langarm'],optional:[]},
-  FRESH:{main:['Neoprenshirt kurzarm','Paddeljacke'],optional:[]},
-  COOL:{main:['Neoprenshirt Langarm','Paddeljacke'],optional:[]},
-  COLD:{main:['LongJohn','Neoprenshirt kurzarm','Paddeljacke'],optional:[]},
-  VERY_COLD:{main:['LongJohn','Neoprenshirt Langarm','Paddeljacke'],optional:[]},
-  ICY:{main:['LongJohn','Neoprenshirt Langarm','Paddeljacke'],optional:[]}
-};
-
-function shift(level:Level,delta:number){ return order[Math.max(0,Math.min(order.length-1,order.indexOf(level)+delta))]; }
-function baseLevel(w:number,a:number):Level{
-  if(w>=20){ if(a<5)return'COOL'; if(a<15)return'FRESH'; if(a<20)return'MILD'; if(a<25)return'WARM'; return'VERY_WARM'; }
-  if(w>=18){ if(a<10)return'COOL'; if(a<15)return'FRESH'; if(a<20)return'MILD'; if(a<25)return'WARM'; return'VERY_WARM'; }
-  if(w>=16){ if(a<5)return'COLD'; if(a<15)return'COOL'; if(a<20)return'FRESH'; if(a<25)return'MILD'; return'WARM'; }
-  if(w>=14){ if(a<10)return'COLD'; if(a<15)return'COOL'; if(a<20)return'FRESH'; if(a<25)return'MILD'; return'WARM'; }
-  if(w>=12)return a<5?'VERY_COLD':'COLD';
-  if(w>=10)return a<10?'VERY_COLD':'COLD';
-  if(w>=8){ if(a<5)return'ICY'; if(a<20)return'VERY_COLD'; return'COLD'; }
-  return a<15?'ICY':'VERY_COLD';
-}
-function minimum(w:number):Level|null{ if(w>=16)return null; if(w>=14)return'FRESH'; if(w>=8)return'COLD'; return'VERY_COLD'; }
-function applyMinimum(level:Level,min:Level|null){ return min&&order.indexOf(level)<order.indexOf(min)?min:level; }
-function gloves(a:number,v:number){ let s:'none'|'optional'|'recommended'=a<5?'recommended':a<10?'optional':'none'; if(a>=10&&a<15&&v>=20)s='optional'; if(v>=20&&s==='optional')s='recommended'; return s; }
-function hood(w:number,a:number){ if(w>15)return a<10?'optional':'none'; if(w>=12)return a<5?'recommended':a<15?'optional':'none'; if(w>=10)return a<10?'recommended':a<20?'optional':'none'; if(w>=8)return a<15?'recommended':'optional'; return a<20?'recommended':'optional'; }
-function stateText(s:string){ return s==='recommended'?'Empfohlen':s==='optional'?'Optional':'Nicht erforderlich'; }
-
-export default function App(){
-  const [live,setLive]=useState<Conditions|null>(null);
-  const [water,setWater]=useState(18);
-  const [air,setAir]=useState(12);
-  const [wind,setWind]=useState(5);
-  const [sun,setSun]=useState<SunMode>('cloudy');
-  const [warmth,setWarmth]=useState<Warmth>('normal');
-  const [manual,setManual]=useState(false);
-  const [loading,setLoading]=useState(true);
-  const [errorMsg,setErrorMsg]=useState('');
-
-  async function load(){
-    setLoading(true); setErrorMsg('');
-    try{
-      const r=await fetch('/api/conditions');
-      if(!r.ok) throw new Error('conditions_fetch_failed');
-      const d=await r.json() as Conditions; setLive(d);
-      if(!manual){ setWater(d.waterTemp); setAir(d.airTemp); setWind(d.windSpeed); setSun(d.sunMode); }
-    }catch{ setErrorMsg('Live-Daten konnten nicht geladen werden. Die manuelle Einstellung bleibt verfügbar.'); }
-    finally{ setLoading(false); }
-  }
-  useEffect(()=>{ void load(); },[]);
-
-  const result=useMemo(()=>{
-    const base=baseLevel(water,air);
-    const afterWind=shift(base,wind>=30?2:wind>=20?1:0);
-    const sunApplies=sun==='sunny'&&wind<10&&air>=10;
-    const afterSun=shift(afterWind,sunApplies?-1:0);
-    const afterPersonal=shift(afterSun,warmth==='cold'?1:warmth==='warm'?-1:0);
-    const min=minimum(water);
-    const finalLevel=applyMinimum(afterPersonal,min);
-    return{base,afterWind,sunApplies,afterPersonal,min,finalLevel,gloves:gloves(air,wind),hood:hood(water,air)};
-  },[water,air,wind,sun,warmth]);
-
-  const outfit=clothes[result.finalLevel];
-  const optional=[...outfit.optional];
-  const extras:string[]=[];
-  if(result.gloves==='optional')optional.push('Neoprenhandschuhe'); else if(result.gloves==='recommended')extras.push('Neoprenhandschuhe');
-  if(result.hood==='optional')optional.push('Neoprenhaube'); else if(result.hood==='recommended')extras.push('Neoprenhaube');
-
-  function takeLive(){ if(!live)return; setWater(live.waterTemp); setAir(live.airTemp); setWind(live.windSpeed); setSun(live.sunMode); setManual(false); }
-  const sunText=sun==='sunny'?'Sonnig':sun==='partly'?'Teilweise sonnig':'Bewölkt';
-
-  return <main className="shell">
-    <header className="hero">
-      <div><div className="eyebrow"><Waves size={17}/> Augsburg · Eiskanal</div><h1>Was ziehe ich heute fürs Kajak an?</h1><p>Live-Wasser vom Hochablass und aktuelles Wetter am Eiskanal – kombiniert mit deinem Wärmeempfinden.</p></div>
-      <button className="primary" onClick={()=>void load()} disabled={loading}><RefreshCw size={18} className={loading?'spin':''}/>{loading?'Aktualisiere…':'Live-Daten neu laden'}</button>
-    </header>
-
-    {errorMsg&&<div className="notice error">{errorMsg}</div>}
-
-    <section className="metrics">
-      <article><Droplets/><span>Wasser Hochablass</span><b>{(live?.waterTemp??water).toFixed(1)} °C</b><small>{live?.waterTime||'manuell'}</small></article>
-      <article><Thermometer/><span>Luft am Eiskanal</span><b>{(live?.airTemp??air).toFixed(1)} °C</b><small>{live?.weatherTime||'manuell'}</small></article>
-      <article><Wind/><span>Wind</span><b>{(live?.windSpeed??wind).toFixed(0)} km/h</b><small>10 m über Grund</small></article>
-      <article>{sun==='sunny'?<Sun/>:<Cloud/>}<span>Sonne</span><b>{live?(live.sunMode==='sunny'?'Sonnig':live.sunMode==='partly'?'Teilweise':'Bewölkt'):sunText}</b><small>{live?live.cloudCover+' % Bewölkung':'manuell'}</small></article>
-    </section>
-
-    <section className="result">
-      <div className={'level '+result.finalLevel}><span>Deine Wärmestufe</span><strong>{labels[result.finalLevel]}</strong></div>
-      <div className="outfit">
-        <div><h2>Empfohlen</h2>{outfit.main.length?outfit.main.map(x=><p key={x}>✓ {x}</p>):<p className="muted">Keine zusätzliche Neopren-Oberbekleidung nötig.</p>}{extras.map(x=><p key={x}>✓ {x}</p>)}</div>
-        {optional.length>0&&<div><h2>Optional</h2>{optional.map(x=><p className="optional" key={x}>+ {x}</p>)}</div>}
-        <div className="always"><h2>Immer dabei</h2><span>Neoprenschuhe · Schwimmweste · Spritzdecke · Helm</span></div>
-      </div>
-    </section>
-
-    <section className="card">
-      <div className="cardhead"><div><div className="eyebrow">Feinabstimmung</div><h2>Bedingungen anpassen</h2></div><button className="link" onClick={()=>setManual(!manual)}>{manual?'Live-Werte verwenden':'Manuell anpassen'}</button></div>
-      {manual&&<div className="controls">
-        <label>Wasser <b>{water.toFixed(1)} °C</b><input type="range" min="5" max="26" step="0.5" value={water} onChange={e=>setWater(Number(e.target.value))}/></label>
-        <label>Luft <b>{air.toFixed(1)} °C</b><input type="range" min="-5" max="35" step="0.5" value={air} onChange={e=>setAir(Number(e.target.value))}/></label>
-        <label>Wind <b>{wind.toFixed(0)} km/h</b><input type="range" min="0" max="50" value={wind} onChange={e=>setWind(Number(e.target.value))}/></label>
-        <div><span>Sonnigkeit</span><div className="segments"><button className={sun==='cloudy'?'on':''} onClick={()=>setSun('cloudy')}>Bewölkt</button><button className={sun==='partly'?'on':''} onClick={()=>setSun('partly')}>Teilweise</button><button className={sun==='sunny'?'on':''} onClick={()=>setSun('sunny')}>Sonnig</button></div></div>
-        <button className="primary" onClick={takeLive} disabled={!live}>Live-Werte übernehmen</button>
-      </div>}
-      {!manual&&<p className="muted">Aktuell werden die Live-Werte verwendet.</p>}
-      <div className="warmth"><span>Persönliches Wärmeempfinden</span><div className="segments"><button className={warmth==='cold'?'on':''} onClick={()=>setWarmth('cold')}>Ich friere schnell</button><button className={warmth==='normal'?'on':''} onClick={()=>setWarmth('normal')}>Normal</button><button className={warmth==='warm'?'on':''} onClick={()=>setWarmth('warm')}>Mir wird schnell warm</button></div></div>
-    </section>
-
-    <section className="card">
-      <h2>Warum diese Empfehlung?</h2>
-      <div className="trace">
-        <span>Grundstufe<b>{labels[result.base]}</b></span>
-        <span>Wind<b>{result.afterWind===result.base?'keine Änderung':wind>=30?'2 Stufen kälter':'1 Stufe kälter'}</b></span>
-        <span>Sonne<b>{result.sunApplies?'1 Stufe wärmer':'keine Änderung'}</b></span>
-        <span>Wärmeempfinden<b>{warmth==='normal'?'keine Änderung':warmth==='cold'?'1 Stufe kälter':'1 Stufe wärmer'}</b></span>
-        <span>Kaltwassergrenze<b>{result.min&&order.indexOf(result.afterPersonal)<order.indexOf(result.min)?'mindestens '+labels[result.min]:'keine Änderung'}</b></span>
-      </div>
-      <div className="extras"><span>Neoprenhaube <b>{stateText(result.hood)}</b></span><span>Neoprenhandschuhe <b>{stateText(result.gloves)}</b></span></div>
-    </section>
-
-    {water<15&&<section className="notice safety"><ShieldCheck/><div><b>Kaltes Wasser</b><p>Kaltes Wasser kann Atmung und Bewegungsfähigkeit unmittelbar nach einer Kenterung beeinträchtigen. Die Empfehlung ist auf kurze Schwimmeinlagen beim Wildwasserkajak ausgelegt.</p>{water<10&&<p><b>Unter 10 °C:</b> LongJohn und Paddeljacke bieten bei längerer Immersion nicht denselben Schutz wie ein Trockenanzug.</p>}</div></section>}
-
-    <footer>Wasser: NID Bayern · Augsburg Hochablaß &nbsp;·&nbsp; Wetter: Open-Meteo · Eiskanal Augsburg</footer>
-  </main>;
-}
+type Point={date:string,value:number}; type Forecast={date:string,tMax:number,tMin:number,precip:number,wind:number,code:number};
+type Data={updatedAt:string;flow:number;flowTime:string;flowChange24h:number|null;waterTemp:number;waterTime:string;airTemp:number;apparentTemp:number;precip:number;weatherCode:number;forecast:Forecast[];flowMonth:Point[];flowYear:Point[];tempMonth:Point[];tempYear:Point[];webcamUrl:string};
+const fmt=(n:number,d=1)=>new Intl.NumberFormat('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);
+const day=(s:string)=>new Date(s+'T12:00:00').toLocaleDateString('de-DE',{weekday:'short'});
+function icon(code:number){if(code===0)return'☀';if(code<=3)return'⛅';if(code<=67)return'🌧';return'☁'}
+function outfit(w:number,a:number){if(w>=20&&a>=20)return'Neoprenshirt kurzarm';if(w>=18&&a>=15)return'Neoprenshirt langarm';if(w>=16&&a>=12)return'Neoprenshirt langarm · Paddeljacke optional';if(w>=14&&a>=10)return'Neoprenshirt kurzarm · Paddeljacke';if(w>=12)return'Long John · Neoprenshirt kurzarm · Paddeljacke';return'Long John · Neoprenshirt langarm · Paddeljacke'}
+function status(flow:number){if(flow>=50)return{label:'Gute Chance auf Wasser',tone:'good',text:'Der Abfluss am Pegel Haunstetten liegt bei mindestens 50 m³/s. Trotzdem Streckenfreigabe vor Ort prüfen.'};if(flow>=40)return{label:'Grenzbereich',tone:'warn',text:'Der Abfluss liegt unter dem langjährigen 50-m³/s-Richtwert. Wasserführung am Eiskanal kann eingeschränkt sein.'};return{label:'Eher zu wenig Wasser',tone:'bad',text:'Unter 50 m³/s bleibt die Wettkampfstrecke nach Betreiberinformation in der Regel ohne ausreichende Wasserführung.'}}
+function Chart({points,unit,threshold}:{points:Point[];unit:string;threshold?:number}){const p=points.slice(-60);if(!p.length)return <div className="empty">Messdaten werden geladen …</div>;const vals=p.map(x=>x.value),min=Math.min(...vals,threshold??Infinity),max=Math.max(...vals,threshold??-Infinity),span=Math.max(1,max-min);const coords=p.map((x,i)=>`${(i/(p.length-1||1))*100},${92-((x.value-min)/span)*76}`).join(' ');const ty=threshold==null?null:92-((threshold-min)/span)*76;return <div className="chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none">{ty!=null&&<line x1="0" x2="100" y1={ty} y2={ty} className="threshold"/>}<polyline points={coords} className="line"/></svg><div className="chartMeta"><span>{fmt(min,unit==='°C'?1:0)} {unit}</span><span>{fmt(max,unit==='°C'?1:0)} {unit}</span></div></div>}
+export default function App(){const[data,setData]=useState<Data|null>(null);const[loading,setLoading]=useState(true);const[err,setErr]=useState('');const[range,setRange]=useState<'month'|'year'>('month');async function load(){setLoading(true);setErr('');try{const r=await fetch('/api/dashboard');if(!r.ok)throw new Error();setData(await r.json())}catch{setErr('Live-Daten konnten nicht geladen werden.')}finally{setLoading(false)}}useEffect(()=>{void load()},[]);const paddle=useMemo(()=>data?status(data.flow):null,[data]);return <main className="page">
+<header className="top"><div><div className="kicker">EISKANAL AUGSBURG · LIVE DASHBOARD</div><h1>Eiskanal Augsburg</h1><p className="updated">Zuletzt aktualisiert: {data?new Date(data.updatedAt).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'—'}</p></div><button onClick={()=>void load()} disabled={loading}><RefreshCw size={17} className={loading?'spin':''}/>{loading?'Aktualisiere…':'Aktualisieren'}</button></header>{err&&<div className="error">{err}</div>}
+<section className={`paddle ${paddle?.tone||''}`}><div><span>PADDELCHECK</span><strong>{paddle?.label||'Bedingungen werden geladen'}</strong><p>{paddle?.text||'Die aktuellen Messwerte des LfU Bayern werden abgerufen.'}</p></div><Waves size={42}/></section>
+<section className="grid3"><article className="metric"><Waves/><span>ABFLUSS · HAUNSTETTEN</span><em>LIVE</em><b>{data?fmt(data.flow):'—'} <small>m³/s</small></b><p>{data?.flowChange24h==null?'24 h: —':`24 h: ${data.flowChange24h>=0?'+':''}${fmt(data.flowChange24h)} m³/s`}</p><small>{data?.flowTime||'LfU-Messdaten werden geladen'}</small></article><article className="metric"><Droplets/><span>WASSERTEMPERATUR · HOCHABLASS</span><em>LIVE</em><b>{data?fmt(data.waterTemp):'—'} <small>°C</small></b><p>Lech am Hochablass</p><small>{data?.waterTime||'LfU-Messdaten werden geladen'}</small></article><article className="metric"><ThermometerSun/><span>WETTER JETZT</span><em>LIVE</em><b>{data?Math.round(data.airTemp):'—'} <small>°C</small></b><p>{data?`${fmt(data.precip)} mm · gefühlt ${Math.round(data.apparentTemp)} °C`:'Open-Meteo wird geladen'}</p><small>Augsburg · Eiskanal</small></article></section>
+<section className="outfit"><div><Shirt/><span>BEKLEIDUNGSEMPFEHLUNG</span><em>LIVE</em></div><strong>{data?outfit(data.waterTemp,data.airTemp):'Wird geladen'}</strong><p>Empfehlung folgt aus Luft- und Wassertemperatur. Helm, Schwimmweste, Spritzdecke und Neoprenschuhe immer dabei.</p></section>
+<section className="chartsHead"><div><span>VERLAUF</span><h2>Messdaten</h2></div><div className="seg"><button className={range==='month'?'active':''} onClick={()=>setRange('month')}>1 Monat</button><button className={range==='year'?'active':''} onClick={()=>setRange('year')}>12 Monate</button></div></section><section className="grid2"><article className="panel"><h3>Abfluss</h3><Chart points={data?(range==='month'?data.flowMonth:data.flowYear):[]} unit="m³/s" threshold={50}/></article><article className="panel"><h3>Wassertemperatur</h3><Chart points={data?(range==='month'?data.tempMonth:data.tempYear):[]} unit="°C"/></article></section>
+<section className="grid2 lower"><article className="panel webcam"><div className="panelTitle"><div><span>AKTUELLES BILD</span><h3>Webcam Olympiastrecke</h3></div><small>Update alle 2 Stunden</small></div>{data?.webcamUrl?<img src={data.webcamUrl} alt="Aktuelles Webcam-Bild der Olympiastrecke am Augsburger Eiskanal"/>:<div className="webcamPlaceholder">Webcam wird geladen</div>}<a href="https://www.eiskanal-augsburg.de/" target="_blank" rel="noreferrer">Webcam in der Originalansicht öffnen <ExternalLink size={14}/></a><p>Aus Datenschutzgründen aktualisiert der Betreiber das Bild alle zwei Stunden.</p></article><article className="panel forecast"><div className="panelTitle"><div><span>AUGSBURG · 7 TAGE</span><h3>Wetterausblick</h3></div><CloudRain/></div><div className="days">{data?.forecast.map((f,i)=><div className="day" key={f.date}><b>{i===0?'Heute':day(f.date)}</b><i>{icon(f.code)}</i><span>{Math.round(f.tMax)} °</span><span>{Math.round(f.tMin)} °</span><small>{fmt(f.precip)} mm</small><small><Wind size={12}/>{Math.round(f.wind)} km/h</small></div>)}</div><p>Tageswerte · Niederschlag und maximale Windgeschwindigkeit · Open-Meteo</p></article></section>
+<footer>Messdaten: Bayerisches Landesamt für Umwelt / HND Bayern · Wetter: Open-Meteo<br/>Die Einschätzung ersetzt keine Prüfung der Streckenfreigabe vor Ort.</footer></main>}
