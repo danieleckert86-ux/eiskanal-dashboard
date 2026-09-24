@@ -66,3 +66,17 @@
 .calculation .advisor-explanation{margin:10px 0 0}
 .calculation .always-worn{margin-top:10px}
 @media(max-width:700px){.advisor-card{padding:15px}}
+.advisor-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"result" "settings";gap:0}
+.advisor-settings{grid-area:settings;margin-top:12px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
+.advisor-settings summary{cursor:pointer;color:var(--aqua);font-size:13px;font-weight:600}
+.advisor-settings summary span{color:var(--muted);font-weight:400;margin-left:8px}
+.advisor-settings .advisor-inputs{margin-top:12px;grid-template-columns:repeat(6,minmax(0,1fr));gap:13px;align-items:start}
+.advisor-settings .advisor-control{grid-column:span 2}
+.advisor-settings .sun-options,.advisor-settings .personal-options{grid-column:span 3}
+.advisor-settings .live-values{grid-column:1/-1;justify-self:start}
+@media(max-width:980px){.advisor-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"result" "settings"}}
+@media(max-width:700px){
+  .advisor-settings summary span{display:block;margin:4px 0 0 16px;font-size:12px}
+  .advisor-settings .advisor-inputs{grid-template-columns:1fr}
+  .advisor-settings .advisor-control,.advisor-settings .sun-options,.advisor-settings .personal-options,.advisor-settings .live-values{grid-column:1/-1}
+}

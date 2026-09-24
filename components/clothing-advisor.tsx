@@ -28,23 +28,8 @@ export function ClothingAdvisor({ liveWater, liveAir, liveWind, weatherCode }: P
   const result = useMemo(() => calculateClothing({ water, air, wind, sun, personal }), [water, air, wind, sun, personal]);
 
   return <section className="advisor-card">
-    <div className="advisor-heading"><h2>Bekleidung fürs Training</h2><button className="live-values" onClick={applyLiveValues} disabled={liveWater == null || liveAir == null || liveWind == null}><RefreshCw size={15}/>Livewerte</button></div>
+    <div className="advisor-heading"><h2>Bekleidung fürs Training</h2></div>
     <div className="advisor-layout">
-      <div className="advisor-inputs">
-        <Slider label="Wassertemperatur" value={water} min={5} max={22} unit="°C" onChange={setWater}/>
-        <Slider label="Lufttemperatur" value={air} min={-10} max={35} unit="°C" onChange={setAir}/>
-        <Slider label="Windgeschwindigkeit" value={wind} min={0} max={60} unit="km/h" onChange={setWind}/>
-        <fieldset className="sun-options"><legend>Sonnigkeit</legend><div>
-          <button aria-pressed={sun === "CLOUDY"} className={sun === "CLOUDY" ? "active" : ""} onClick={() => setSun("CLOUDY")}><CloudSun size={16}/>Bewölkt</button>
-          <button aria-pressed={sun === "PARTLY"} className={sun === "PARTLY" ? "active" : ""} onClick={() => setSun("PARTLY")}><CloudSun size={16}/>Teilweise sonnig</button>
-          <button aria-pressed={sun === "SUNNY"} className={sun === "SUNNY" ? "active" : ""} onClick={() => setSun("SUNNY")}><Sun size={16}/>Direkte Sonne</button>
-        </div></fieldset>
-        <fieldset className="personal-options"><legend>Wärmeempfinden</legend><div>
-          <button type="button" aria-pressed={personal === "COLD_SENSITIVE"} className={personal === "COLD_SENSITIVE" ? "active" : ""} onClick={() => setPersonal("COLD_SENSITIVE")}>Friere schnell</button>
-          <button type="button" aria-pressed={personal === "NORMAL"} className={personal === "NORMAL" ? "active" : ""} onClick={() => setPersonal("NORMAL")}>Normal</button>
-          <button type="button" aria-pressed={personal === "RUNS_WARM"} className={personal === "RUNS_WARM" ? "active" : ""} onClick={() => setPersonal("RUNS_WARM")}>Mir wird warm</button>
-        </div></fieldset>
-      </div>
       <div className="advisor-result">
         <div className={`heat-stage stage-${result.stage.toLowerCase().replace("_", "-")}`}><Shirt size={22}/><span>Deine Wärmestufe</span><strong>{result.stageLabel}</strong></div>
         <div className="gear-block"><h3>Empfehlung</h3>{result.recommended.length ? <div className="gear-chips">{result.recommended.map((item) => <span key={item}>{item}</span>)}</div> : <p className="gear-empty">Keine zusätzliche Oberbekleidung.</p>}</div>
@@ -57,6 +42,25 @@ export function ClothingAdvisor({ liveWater, liveAir, liveWind, weatherCode }: P
           {water < 10 && <p className="safety-note stronger">LongJohn und Paddeljacke ersetzen bei längerer Schwimmeinlage keinen Trockenanzug.</p>}
         </details>
       </div>
+      <details className="advisor-settings">
+        <summary>Bedingungen anpassen <span>{water} °C Wasser · {air} °C Luft · {wind} km/h Wind</span></summary>
+        <div className="advisor-inputs">
+          <Slider label="Wassertemperatur" value={water} min={5} max={22} unit="°C" onChange={setWater}/>
+          <Slider label="Lufttemperatur" value={air} min={-10} max={35} unit="°C" onChange={setAir}/>
+          <Slider label="Windgeschwindigkeit" value={wind} min={0} max={60} unit="km/h" onChange={setWind}/>
+          <fieldset className="sun-options"><legend>Sonnigkeit</legend><div>
+            <button type="button" aria-pressed={sun === "CLOUDY"} className={sun === "CLOUDY" ? "active" : ""} onClick={() => setSun("CLOUDY")}><CloudSun size={16}/>Bewölkt</button>
+            <button type="button" aria-pressed={sun === "PARTLY"} className={sun === "PARTLY" ? "active" : ""} onClick={() => setSun("PARTLY")}><CloudSun size={16}/>Teilweise sonnig</button>
+            <button type="button" aria-pressed={sun === "SUNNY"} className={sun === "SUNNY" ? "active" : ""} onClick={() => setSun("SUNNY")}><Sun size={16}/>Direkte Sonne</button>
+          </div></fieldset>
+          <fieldset className="personal-options"><legend>Wärmeempfinden</legend><div>
+            <button type="button" aria-pressed={personal === "COLD_SENSITIVE"} className={personal === "COLD_SENSITIVE" ? "active" : ""} onClick={() => setPersonal("COLD_SENSITIVE")}>Friere schnell</button>
+            <button type="button" aria-pressed={personal === "NORMAL"} className={personal === "NORMAL" ? "active" : ""} onClick={() => setPersonal("NORMAL")}>Normal</button>
+            <button type="button" aria-pressed={personal === "RUNS_WARM"} className={personal === "RUNS_WARM" ? "active" : ""} onClick={() => setPersonal("RUNS_WARM")}>Mir wird warm</button>
+          </div></fieldset>
+          <button type="button" className="live-values" onClick={applyLiveValues} disabled={liveWater == null || liveAir == null || liveWind == null}><RefreshCw size={15}/>Livewerte übernehmen</button>
+        </div>
+      </details>
     </div>
   </section>;
 }
