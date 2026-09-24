@@ -54,3 +54,15 @@
   .sun-options>div{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:390px){.sun-options>div,.personal-options>div{grid-template-columns:1fr}}
+.advisor-card{padding:16px 20px}
+.advisor-heading{align-items:center}
+.advisor-heading h2{margin:0;font-size:20px}
+.advisor-layout{margin-top:12px;gap:14px}
+.advisor-inputs{gap:9px;padding:12px}
+.heat-stage{padding:10px 13px}
+.gear-block{margin-top:10px}
+.gear-block.optional{padding-top:9px}
+.calculation{margin-top:11px;padding-top:9px}
+.calculation .advisor-explanation{margin:10px 0 0}
+.calculation .always-worn{margin-top:10px}
+@media(max-width:700px){.advisor-card{padding:15px}}
