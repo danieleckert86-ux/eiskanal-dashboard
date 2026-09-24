@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CloudSun, RefreshCw, Shirt, Sun } from "lucide-react";
-import { calculateClothing, type Sun as SunValue } from "@/lib/clothing-advisor";
+import { calculateClothing, type Personal, type Sun as SunValue } from "@/lib/clothing-advisor";
 
 type Props = { liveWater?: number; liveAir?: number; liveWind?: number; weatherCode?: number };
 
@@ -18,13 +18,14 @@ export function ClothingAdvisor({ liveWater, liveAir, liveWind, weatherCode }: P
   const [air, setAir] = useState(() => Math.round(clamp(liveAir ?? 15, -10, 35)));
   const [wind, setWind] = useState(() => Math.round(clamp(liveWind ?? 5, 0, 60)));
   const [sun, setSun] = useState<SunValue>(() => sunFromCode(weatherCode));
+  const [personal, setPersonal] = useState<Personal>("NORMAL");
   const applyLiveValues = () => {
     if (liveWater != null) setWater(Math.round(clamp(liveWater, 5, 22)));
     if (liveAir != null) setAir(Math.round(clamp(liveAir, -10, 35)));
     if (liveWind != null) setWind(Math.round(clamp(liveWind, 0, 60)));
     setSun(sunFromCode(weatherCode));
   };
-  const result = useMemo(() => calculateClothing({ water, air, wind, sun }), [water, air, wind, sun]);
+  const result = useMemo(() => calculateClothing({ water, air, wind, sun, personal }), [water, air, wind, sun, personal]);
 
   return <section className="advisor-card">
     <div className="advisor-heading"><div><span className="eyebrow">INTERAKTIVER BERATER</span><h2>Bekleidung fürs Training</h2><p>Livewerte sind vorbelegt und lassen sich für deine geplante Trainingszeit anpassen.</p></div><button className="live-values" onClick={applyLiveValues} disabled={liveWater == null || liveAir == null || liveWind == null}><RefreshCw size={15}/>Livewerte</button></div>
@@ -38,16 +39,21 @@ export function ClothingAdvisor({ liveWater, liveAir, liveWind, weatherCode }: P
           <button aria-pressed={sun === "PARTLY"} className={sun === "PARTLY" ? "active" : ""} onClick={() => setSun("PARTLY")}><CloudSun size={16}/>Teilweise sonnig</button>
           <button aria-pressed={sun === "SUNNY"} className={sun === "SUNNY" ? "active" : ""} onClick={() => setSun("SUNNY")}><Sun size={16}/>Direkte Sonne</button>
         </div></fieldset>
+        <fieldset className="personal-options"><legend>Wärmeempfinden</legend><div>
+          <button type="button" aria-pressed={personal === "COLD_SENSITIVE"} className={personal === "COLD_SENSITIVE" ? "active" : ""} onClick={() => setPersonal("COLD_SENSITIVE")}>Friere schnell</button>
+          <button type="button" aria-pressed={personal === "NORMAL"} className={personal === "NORMAL" ? "active" : ""} onClick={() => setPersonal("NORMAL")}>Normal</button>
+          <button type="button" aria-pressed={personal === "RUNS_WARM"} className={personal === "RUNS_WARM" ? "active" : ""} onClick={() => setPersonal("RUNS_WARM")}>Mir wird warm</button>
+        </div></fieldset>
       </div>
       <div className="advisor-result">
         <div className={`heat-stage stage-${result.stage.toLowerCase().replace("_", "-")}`}><Shirt size={22}/><span>Deine Wärmestufe</span><strong>{result.stageLabel}</strong></div>
-        <div className="gear-block"><h3>Empfohlene Kleidung</h3><div className="gear-chips">{result.recommended.map((item) => <span key={item}>{item}</span>)}</div></div>
-        {result.optional.length > 0 && <div className="gear-block optional"><h3>Optional</h3><div className="gear-chips">{result.optional.map((item) => <span key={item}>{item}</span>)}</div><p>Bei höherem Kälteempfinden, viel Wind, vielen Rollen oder viel Kontakt mit kaltem Wasser.</p></div>}
+        <div className="gear-block"><h3>Empfohlene Kleidung</h3>{result.recommended.length ? <div className="gear-chips">{result.recommended.map((item) => <span key={item}>{item}</span>)}</div> : <p className="gear-empty">Keine zusätzliche Neopren-Oberbekleidung nötig.</p>}</div>
+        {result.optional.length > 0 && <div className="gear-block optional"><h3>Optional</h3><div className="gear-chips">{result.optional.map((item) => <span key={item}>{item}</span>)}</div></div>}
         <div className="always-worn"><strong>Immer dabei</strong><span>{result.always.join(" · ")}</span></div>
         <p className="advisor-explanation">{result.explanation}</p>
-        <details className="calculation"><summary>Berechnungsweg</summary><dl><div><dt>Grundstufe</dt><dd>{result.baseLabel}</dd></div><div><dt>Wind</dt><dd>{result.windText}</dd></div><div><dt>Sonne</dt><dd>{result.sunText}</dd></div><div><dt>Kaltwassergrenze</dt><dd>{result.minimumText}</dd></div><div><dt>Endergebnis</dt><dd>{result.stageLabel}</dd></div></dl></details>
+        <details className="calculation"><summary>Warum diese Empfehlung?</summary><dl><div><dt>Grundstufe</dt><dd>{result.baseLabel}</dd></div><div><dt>Wind</dt><dd>{result.windText}</dd></div><div><dt>Sonne</dt><dd>{result.sunText}</dd></div><div><dt>Wärmeempfinden</dt><dd>{result.personalText}</dd></div><div><dt>Kaltwassergrenze</dt><dd>{result.minimumText}</dd></div><div><dt>Haube</dt><dd>{result.hood === "none" ? "nicht erforderlich" : result.hood === "optional" ? "optional" : "empfohlen"}</dd></div><div><dt>Handschuhe</dt><dd>{result.gloves === "none" ? "nicht erforderlich" : result.gloves === "optional" ? "optional" : "empfohlen"}</dd></div><div><dt>Endergebnis</dt><dd>{result.stageLabel}</dd></div></dl></details>
         {water < 15 && <p className="safety-note">Kaltes Wasser kann Atmung und Bewegungsfähigkeit unmittelbar nach einer Kenterung beeinträchtigen. Die Empfehlung ist auf kurze Schwimmeinlagen beim Wildwasserkajak ausgelegt und ersetzt keine individuelle Sicherheitsentscheidung.</p>}
-        {water < 10 && <p className="safety-note stronger">Sehr kaltes Wasser: Die angezeigte Kombination beschreibt die wärmste sinnvolle Kombination der hier verfügbaren Ausrüstung. LongJohn und Semidry-Paddeljacke bieten bei längerer Immersion nicht denselben Schutz wie ein Trockenanzug.</p>}
+        {water < 10 && <p className="safety-note stronger">Sehr kaltes Wasser: Die angezeigte Kombination beschreibt die wärmste sinnvolle Kombination der hier verfügbaren Ausrüstung. LongJohn und Paddeljacke bieten bei längerer Immersion nicht denselben Schutz wie ein Trockenanzug.</p>}
       </div>
     </div>
   </section>;

@@ -16,3 +16,41 @@
 @media(max-width:700px){.stat-grid{grid-template-columns:1fr}.advisor-card{padding:17px}.advisor-heading{display:block}.live-values{margin-top:13px}.advisor-layout{margin-top:17px;gap:16px}.advisor-inputs{grid-template-columns:1fr;padding:15px}.sun-options{grid-column:auto}.sun-options>div{grid-template-columns:1fr}.heat-stage{grid-template-columns:auto 1fr}.heat-stage strong{grid-column:1/-1;font-size:26px}.always-worn{display:block}.always-worn span{display:block;margin-top:5px}.calculation dl div{gap:10px}}
 .advisor-loading{color:var(--muted);font-size:14px}.wind{text-align:right}
 @media(max-width:700px){.forecast-row{grid-template-columns:48px 26px 54px 1fr 62px;gap:5px;font-size:11px}.gust{display:initial}}
+
+/* Compact clothing advisor: the recommendation gets the wider column. */
+.advisor-card{padding:19px 22px}
+.advisor-heading h2{font-size:21px}
+.advisor-heading p{font-size:12px;margin-top:4px}
+.advisor-layout{grid-template-columns:minmax(0,1.3fr) minmax(290px,.7fr);grid-template-areas:"result inputs";gap:17px;margin-top:15px}
+.advisor-result{grid-area:result}
+.advisor-inputs{grid-area:inputs;gap:11px;padding:14px;align-content:start}
+.advisor-control>span{font-size:12px}
+.advisor-control input{margin-top:7px}
+.sun-options legend,.personal-options legend{font-size:12px;font-weight:600;margin-bottom:7px}
+.sun-options button,.personal-options button{min-height:36px;padding:5px;font-size:11px;line-height:1.2}
+.sun-options>div,.personal-options>div{gap:5px}
+.personal-options{border:0;padding:0;margin:0}
+.personal-options>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.personal-options button{border:1px solid var(--line);border-radius:8px;background:#091720;color:var(--muted);cursor:pointer}
+.personal-options button.active{border-color:rgba(49,214,208,.6);background:rgba(49,214,208,.12);color:var(--text)}
+.gear-block{margin-top:12px}
+.gear-block.optional{padding-top:10px}
+.gear-chips{gap:6px}
+.gear-chips span{padding:6px 9px}
+.gear-empty{color:var(--muted);font-size:13px;margin:0}
+.always-worn{margin-top:11px}
+.advisor-explanation{margin-top:11px}
+.calculation{margin-top:10px}
+.safety-note{margin-top:10px}
+@media(max-width:980px){
+  .advisor-layout{grid-template-columns:1fr;grid-template-areas:"inputs" "result"}
+  .advisor-inputs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sun-options,.personal-options{grid-column:1/-1}
+}
+@media(max-width:700px){
+  .advisor-card{padding:16px}
+  .advisor-inputs{grid-template-columns:1fr}
+  .sun-options,.personal-options{grid-column:auto}
+  .sun-options>div{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:390px){.sun-options>div,.personal-options>div{grid-template-columns:1fr}}
