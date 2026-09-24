@@ -1,1 +1,6 @@
-node_modules\ndist\n.env\n.env.local\n.vercel\n
+node_modules
+.next
+.vercel
+*.tsbuildinfo
+.env*
+!.env.example

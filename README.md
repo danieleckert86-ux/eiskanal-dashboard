@@ -1,13 +1,12 @@
-# Eiskanal Augsburg Dashboard
+# Eiskanal Augsburg
 
-Migration der bestehenden WORK-Site `eiskanal-augsburg-dashboard.daniel-eckert86.chatgpt.site`.
+Das Dashboard ist die unveränderte Benutzeroberfläche der Sites-Version, übertragen auf Next.js für Vercel. Die zwei API-Routen lesen aktuelle Messdaten vom Gewässerkundlichen Dienst Bayern und das Kamerabild vom Eiskanal-Betreiber; Wetterdaten kommen direkt von Open-Meteo.
 
-Enthalten:
-- Abfluss Haunstetten (Messstelle 12003500)
-- Wassertemperatur Hochablass (Messstelle 12004002)
-- 24-h-Änderung und Paddelcheck mit 50-m³/s-Richtwert
-- 1-Monat- und rollierende 12-Monate-Verläufe
-- Webcam Olympiastrecke
-- aktuelles Wetter und 7-Tage-Prognose
-- Bekleidungsempfehlung
-- Neon-Fallback für erfolgreiche Dashboard-Snapshots
+## Starten
+
+```sh
+pnpm install
+pnpm dev
+```
+
+Für den Betrieb sind keine Umgebungsvariablen erforderlich. Es werden keine Anwendungsdaten gespeichert; die Neon-Datenbank wird deshalb derzeit nicht abgefragt. Die Sites-Version bleibt als eigene Veröffentlichung bestehen.
