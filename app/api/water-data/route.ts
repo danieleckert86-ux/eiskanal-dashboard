@@ -13,10 +13,28 @@ function parse(html: string): Point[] {
   });
 }
 const formatted = (p: Point) => ({ label: p.date.slice(0, 6), value: p.value, date: p.date });
-function sample(points: Point[], count = 32) {
-  const list = [...points].reverse();
-  if (list.length <= count) return list.map(formatted);
-  return Array.from({ length: count }, (_, i) => list[Math.round(i * (list.length - 1) / (count - 1))]).map(formatted);
+// One point per calendar day keeps the rolling window evenly spaced.
+// Historical daily means cover days outside the source's current-month table.
+function rollingMonth(recent: Point[], daily: Point[], end: number) {
+  const start = end - 28 * DAY;
+  const byDay = new Map<number, Point>();
+  for (const point of daily) {
+    const time = timestamp(point.date);
+    if (time >= start && time <= end) byDay.set(time, point);
+  }
+  const groups = new Map<number, Point[]>();
+  for (const point of recent) {
+    const time = timestamp(point.date);
+    if (time >= start && time <= end) groups.set(time, [...(groups.get(time) ?? []), point]);
+  }
+  for (const [time, points] of groups) {
+    if (byDay.has(time) && time < end) continue;
+    byDay.set(time, {
+      date: points[0].date.slice(0, 10),
+      value: points.reduce((sum, point) => sum + point.value, 0) / points.length,
+    });
+  }
+  return [...byDay.entries()].sort(([a], [b]) => a - b).map(([, point]) => formatted(point));
 }
 function timestamp(date: string) {
   const [day, month, year] = date.slice(0, 10).split(".").map(Number);
@@ -51,13 +69,17 @@ async function load(url: string) {
 }
 export async function GET() {
   try {
-    const year = new Date().getUTCFullYear();
+    const today = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date());
+    const end = timestamp(today);
+    const year = new Date(end).getUTCFullYear();
+    const startDate = new Date(end - 28 * DAY).toLocaleDateString("de-DE", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" });
+    const monthWindow = `?beginn=${startDate}&ende=${today}`;
     const previousYear = `?beginn=01.01.${year - 1}&ende=31.12.${year - 1}`;
     const [fm, fy, fyPrevious, tm, ty, tyPrevious] = await Promise.all([
-      load(`${BASE}/abfluss/bayern/haunstetten-12003500/monatswerte/tabelle`),
+      load(`${BASE}/abfluss/bayern/haunstetten-12003500/monatswerte/tabelle${monthWindow}`),
       load(`${BASE}/abfluss/bayern/haunstetten-12003500/jahreswerte/tabelle`),
       load(`${BASE}/abfluss/bayern/haunstetten-12003500/jahreswerte/tabelle${previousYear}`),
-      load(`${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/monatswerte/tabelle`),
+      load(`${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/monatswerte/tabelle${monthWindow}`),
       load(`${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle`),
       load(`${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle${previousYear}`),
     ]);
@@ -65,8 +87,8 @@ export async function GET() {
     const f24 = fm[Math.min(96, fm.length - 1)]?.value ?? fm[0].value;
     const t24 = tm[Math.min(96, tm.length - 1)]?.value ?? tm[0].value;
     return NextResponse.json({
-      flow: { current: fm[0].value, delta24h: fm[0].value - f24, updated: fm[0].date, month: sample(fm), year: weekly([...fyPrevious, ...fy]) },
-      temp: { current: tm[0].value, delta24h: tm[0].value - t24, updated: tm[0].date, month: sample(tm), year: weekly([...tyPrevious, ...ty]) },
+      flow: { current: fm[0].value, delta24h: fm[0].value - f24, updated: fm[0].date, month: rollingMonth(fm, [...fyPrevious, ...fy], end), year: weekly([...fyPrevious, ...fy]) },
+      temp: { current: tm[0].value, delta24h: tm[0].value - t24, updated: tm[0].date, month: rollingMonth(tm, [...tyPrevious, ...ty], end), year: weekly([...tyPrevious, ...ty]) },
       source: "Gewässerkundlicher Dienst Bayern (LfU)",
     }, { headers: { "Cache-Control": "public, max-age=300, s-maxage=300" } });
   } catch {
