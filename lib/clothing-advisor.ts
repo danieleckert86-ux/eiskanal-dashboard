@@ -27,8 +27,8 @@ export function determineBaseLevel(water: number, air: number): Stage {
   const column = airColumn(air);
   if (water >= 20) return ["COOL", "FRESH", "FRESH", "MILD", "WARM", "VERY_WARM"][column] as Stage;
   if (water >= 18) return ["COOL", "COOL", "FRESH", "MILD", "WARM", "VERY_WARM"][column] as Stage;
-  if (water >= 16) return ["COLD", "COOL", "COOL", "FRESH", "MILD", "WARM"][column] as Stage;
-  if (water >= 14) return ["COLD", "COLD", "COOL", "FRESH", "MILD", "WARM"][column] as Stage;
+  if (water >= 16) return ["COLD", "COLD", "COLD", "FRESH", "MILD", "WARM"][column] as Stage;
+  if (water >= 14) return "COLD";
   if (water >= 12) return air < 5 ? "VERY_COLD" : "COLD";
   if (water >= 10) return air < 10 ? "VERY_COLD" : "COLD";
   if (water >= 8) return air < 5 ? "ICY" : air < 20 ? "VERY_COLD" : "COLD";
@@ -51,7 +51,7 @@ export function applyPersonalCorrection(stage: Stage, personal: Personal) {
   return { stage: shift(stage, steps), steps };
 }
 export function applyColdWaterMinimum(stage: Stage, water: number) {
-  const minimum: Stage | null = water >= 16 ? null : water >= 14 ? "FRESH" : water >= 8 ? "COLD" : "VERY_COLD";
+  const minimum: Stage | null = water >= 16 ? null : water >= 8 ? "COLD" : "VERY_COLD";
   const finalStage = minimum && STAGES.indexOf(stage) < STAGES.indexOf(minimum) ? minimum : stage;
   return { stage: finalStage, minimum, changed: finalStage !== stage };
 }
@@ -91,8 +91,6 @@ export function calculateClothing({ water, air, wind, sun, personal = "NORMAL" }
   const gloves = determineGloves(air, wind);
   const hood = determineHood(safeWater, air);
   const recommended = [...main.recommended], optional = [...main.optional];
-  // Water temperature alone determines whether a LongJohn is required.
-  if (safeWater < 16 && !recommended.includes("LongJohn")) recommended.unshift("LongJohn");
   if (gloves === "recommended") recommended.push("Neoprenhandschuhe");
   if (gloves === "optional") optional.push("Neoprenhandschuhe");
   if (hood === "recommended") recommended.push("Neoprenhaube");
