@@ -86,3 +86,15 @@
   .forecast-row .rain{flex-direction:column;align-items:flex-start;gap:0;line-height:1.25}
   .forecast-row{min-height:44px}
 }
+.stat-grid{grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch}
+.stat-grid .advisor-card{margin-top:0;min-width:0;padding:17px 18px}
+.stat-grid .advisor-heading h2{font-size:18px}
+.stat-grid .heat-stage{grid-template-columns:auto minmax(0,1fr);gap:4px 9px}
+.stat-grid .heat-stage strong{grid-column:2;font-size:20px}
+.stat-grid .advisor-layout{margin-top:13px}
+.stat-grid .advisor-settings summary span{display:block;margin:4px 0 0 16px;font-size:12px}
+.stat-grid .advisor-settings .advisor-inputs{grid-template-columns:1fr}
+.stat-grid .advisor-settings .advisor-control,.stat-grid .advisor-settings .sun-options,.stat-grid .advisor-settings .personal-options,.stat-grid .advisor-settings .live-values{grid-column:1/-1}
+.stat-grid .sun-options>div,.stat-grid .personal-options>div{grid-template-columns:1fr}
+@media(max-width:1200px){.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.stat-grid{grid-template-columns:1fr}}

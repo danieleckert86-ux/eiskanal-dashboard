@@ -34,13 +34,6 @@ export function ClothingAdvisor({ liveWater, liveAir, liveWind, weatherCode }: P
         <div className={`heat-stage stage-${result.stage.toLowerCase().replace("_", "-")}`}><Shirt size={22}/><span>Deine Wärmestufe</span><strong>{result.stageLabel}</strong></div>
         <div className="gear-block"><h3>Empfehlung</h3>{result.recommended.length ? <div className="gear-chips">{result.recommended.map((item) => <span key={item}>{item}</span>)}</div> : <p className="gear-empty">Keine zusätzliche Oberbekleidung.</p>}</div>
         {result.optional.length > 0 && <div className="gear-block optional"><h3>Optional</h3><div className="gear-chips">{result.optional.map((item) => <span key={item}>{item}</span>)}</div></div>}
-        <details className="calculation"><summary>Details & Sicherheit</summary>
-          <p className="advisor-explanation">{result.explanation}</p>
-          <div className="always-worn"><strong>Immer dabei</strong><span>{result.always.join(" · ")}</span></div>
-          <dl><div><dt>Grundstufe</dt><dd>{result.baseLabel}</dd></div><div><dt>Wind</dt><dd>{result.windText}</dd></div><div><dt>Sonne</dt><dd>{result.sunText}</dd></div><div><dt>Wärmeempfinden</dt><dd>{result.personalText}</dd></div><div><dt>Kaltwassergrenze</dt><dd>{result.minimumText}</dd></div><div><dt>Haube</dt><dd>{result.hood === "none" ? "nicht erforderlich" : result.hood === "optional" ? "optional" : "empfohlen"}</dd></div><div><dt>Handschuhe</dt><dd>{result.gloves === "none" ? "nicht erforderlich" : result.gloves === "optional" ? "optional" : "empfohlen"}</dd></div></dl>
-          {water < 15 && <p className="safety-note">Kaltes Wasser kann Atmung und Bewegungsfähigkeit nach einer Kenterung beeinträchtigen. Die Empfehlung ist für kurze Schwimmeinlagen ausgelegt.</p>}
-          {water < 10 && <p className="safety-note stronger">LongJohn und Paddeljacke ersetzen bei längerer Schwimmeinlage keinen Trockenanzug.</p>}
-        </details>
       </div>
       <details className="advisor-settings">
         <summary>Bedingungen anpassen <span>{water} °C Wasser · {air} °C Luft · {wind} km/h Wind</span></summary>
