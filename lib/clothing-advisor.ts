@@ -91,6 +91,8 @@ export function calculateClothing({ water, air, wind, sun, personal = "NORMAL" }
   const gloves = determineGloves(air, wind);
   const hood = determineHood(safeWater, air);
   const recommended = [...main.recommended], optional = [...main.optional];
+  // Water temperature alone determines whether a LongJohn is required.
+  if (safeWater < 16 && !recommended.includes("LongJohn")) recommended.unshift("LongJohn");
   if (gloves === "recommended") recommended.push("Neoprenhandschuhe");
   if (gloves === "optional") optional.push("Neoprenhandschuhe");
   if (hood === "recommended") recommended.push("Neoprenhaube");
