@@ -78,7 +78,7 @@ function metric(recent: Point[], thisYear: Point[], lastYear: Point[], end: numb
   const history = [...lastYear, ...thisYear];
   const current = recent[0] ?? null;
   const past = recent[Math.min(96, recent.length - 1)] ?? null;
-  const parsedDate = current?.date.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{4})(?:\\s+(\\d{2}):(\\d{2}))?/);
+  const parsedDate = current?.date.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
   const measuredAt = parsedDate ? Date.UTC(Number(parsedDate[3]), Number(parsedDate[2]) - 1, Number(parsedDate[1]), Number(parsedDate[4] ?? 12), Number(parsedDate[5] ?? 0)) - 60 * 60 * 1000 : NaN;
   const age = Date.now() - measuredAt;
   // Treat measurements older than 24 hours as unavailable for live decisions.
