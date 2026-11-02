@@ -67,31 +67,46 @@ async function load(url: string) {
   if (!r.ok) throw new Error(String(r.status));
   return parse(await r.text());
 }
+// Each source is optional: a failed historical table must not hide live readings.
+type LoadResult = PromiseSettledResult<Point[]>;
+function points(result: LoadResult, name: string): Point[] {
+  if (result.status === "fulfilled") return result.value;
+  console.error("[water-data] Source unavailable:", name, result.reason);
+  return [];
+}
+function metric(recent: Point[], thisYear: Point[], lastYear: Point[], end: number, name: string) {
+  const history = [...lastYear, ...thisYear];
+  const current = recent[0] ?? null;
+  const past = recent[Math.min(96, recent.length - 1)] ?? null;
+  return {
+    current: current?.value ?? null,
+    delta24h: current && past ? current.value - past.value : null,
+    updated: current?.date ?? null,
+    month: rollingMonth(recent, history, end),
+    year: weekly(history),
+    ...(!current ? { error: name + " aktuell nicht verfügbar" } : {}),
+  };
+}
 export async function GET() {
-  try {
-    const today = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date());
-    const end = timestamp(today);
-    const year = new Date(end).getUTCFullYear();
-    const startDate = new Date(end - 28 * DAY).toLocaleDateString("de-DE", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" });
-    const monthWindow = `?beginn=${startDate}&ende=${today}`;
-    const previousYear = `?beginn=01.01.${year - 1}&ende=31.12.${year - 1}`;
-    const [fm, fy, fyPrevious, tm, ty, tyPrevious] = await Promise.all([
-      load(`${BASE}/abfluss/bayern/haunstetten-12003500/monatswerte/tabelle${monthWindow}`),
-      load(`${BASE}/abfluss/bayern/haunstetten-12003500/jahreswerte/tabelle`),
-      load(`${BASE}/abfluss/bayern/haunstetten-12003500/jahreswerte/tabelle${previousYear}`),
-      load(`${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/monatswerte/tabelle${monthWindow}`),
-      load(`${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle`),
-      load(`${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle${previousYear}`),
-    ]);
-    if (!fm.length || !tm.length) throw new Error("empty");
-    const f24 = fm[Math.min(96, fm.length - 1)]?.value ?? fm[0].value;
-    const t24 = tm[Math.min(96, tm.length - 1)]?.value ?? tm[0].value;
-    return NextResponse.json({
-      flow: { current: fm[0].value, delta24h: fm[0].value - f24, updated: fm[0].date, month: rollingMonth(fm, [...fyPrevious, ...fy], end), year: weekly([...fyPrevious, ...fy]) },
-      temp: { current: tm[0].value, delta24h: tm[0].value - t24, updated: tm[0].date, month: rollingMonth(tm, [...tyPrevious, ...ty], end), year: weekly([...tyPrevious, ...ty]) },
-      source: "Gewässerkundlicher Dienst Bayern (LfU)",
-    }, { headers: { "Cache-Control": "public, max-age=300, s-maxage=300" } });
-  } catch {
-    return NextResponse.json({ error: "Messdaten derzeit nicht verfügbar" }, { status: 502 });
-  }
+  const today = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date());
+  const end = timestamp(today);
+  const year = new Date(end).getUTCFullYear();
+  const startDate = new Date(end - 28 * DAY).toLocaleDateString("de-DE", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" });
+  const monthWindow = `?beginn=${startDate}&ende=${today}`;
+  const previousYear = `?beginn=01.01.${year - 1}&ende=31.12.${year - 1}`;
+  const urls = [
+    `${BASE}/abfluss/bayern/haunstetten-12003500/monatswerte/tabelle${monthWindow}`,
+    `${BASE}/abfluss/bayern/haunstetten-12003500/jahreswerte/tabelle`,
+    `${BASE}/abfluss/bayern/haunstetten-12003500/jahreswerte/tabelle${previousYear}`,
+    `${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/monatswerte/tabelle${monthWindow}`,
+    `${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle`,
+    `${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle${previousYear}`,
+  ];
+  const results = await Promise.allSettled(urls.map(load));
+  const [fm, fy, fp, tm, ty, tp] = results.map((result, i) => points(result, urls[i]));
+  return NextResponse.json({
+    flow: metric(fm, fy, fp, end, "Abfluss Haunstetten"),
+    temp: metric(tm, ty, tp, end, "Wassertemperatur Hochablass"),
+    source: "Gewässerkundlicher Dienst Bayern (LfU)",
+  }, { headers: { "Cache-Control": "public, max-age=300, s-maxage=300" } });
 }
