@@ -42,14 +42,41 @@ export default function DashboardClient({ initialWater, initialWeather }: { init
   const [water, setWater] = useState<WaterData | null>(initialWater);
   const [updated, setUpdated] = useState(new Date());
   const refresh = useCallback(() => {
-    setUpdated(new Date());
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=48.348&longitude=10.93&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FBerlin&forecast_days=7").then(async (r) => await r.json() as WeatherData).then(setWeather).catch(() => setWeather(null));
-    fetch("/api/water-data").then(async (r) => {
-      if (!r.ok) throw new Error("Messdaten nicht verfügbar");
-      return await r.json() as WaterData;
-    }).then(setWater).catch(() => setWater(null));
+    // Preserve the last successfully loaded values on temporary network failures.
+    // The server already supplies initial values; a failed browser request must not erase them.
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=48.348&longitude=10.93&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FBerlin&forecast_days=7", { cache: "no-store" })
+      .then(async (r) => {
+        if (!r.ok) throw new Error("Wetterdaten nicht verfügbar");
+        return await r.json() as WeatherData;
+      })
+      .then((data) => {
+        if (!data?.current || !data?.daily?.time) throw new Error("Ungültige Wetterdaten");
+        setWeather(data);
+        setUpdated(new Date());
+      })
+      .catch((error) => console.warn("Wetteraktualisierung fehlgeschlagen; letzte Daten bleiben sichtbar", error));
+    fetch("/api/water-data", { cache: "no-store" })
+      .then(async (r) => {
+        if (!r.ok) throw new Error("Messdaten nicht verfügbar");
+        return await r.json() as WaterData;
+      })
+      .then((data) => {
+        if (!data?.flow || !data?.temp) throw new Error("Ungültige Messdaten");
+        setWater(data);
+        setUpdated(new Date());
+      })
+      .catch((error) => console.warn("Messdatenaktualisierung fehlgeschlagen; letzte Daten bleiben sichtbar", error));
   }, []);
-  useEffect(() => { const timer = window.setTimeout(refresh, 0); return () => window.clearTimeout(timer); }, [refresh]);
+  useEffect(() => {
+    // Server preloading avoids redundant requests during initial browser hydration.
+    if (!initialWater || !initialWeather) {
+      const initialTimer = window.setTimeout(refresh, 0);
+      const interval = window.setInterval(refresh, 5 * 60 * 1000);
+      return () => { window.clearTimeout(initialTimer); window.clearInterval(interval); };
+    }
+    const interval = window.setInterval(refresh, 5 * 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [refresh, initialWater, initialWeather]);
   const flow = water?.flow;
   const temp = water?.temp;
   const flowAvailable = flow?.current != null;
