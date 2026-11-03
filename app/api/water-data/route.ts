@@ -62,10 +62,36 @@ function weekly(points: Point[]) {
     };
   });
 }
-async function load(url: string) {
-  const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 Eiskanal-Dashboard/1.0" }, cache: "no-store" });
-  if (!r.ok) throw new Error(String(r.status));
-  return parse(await r.text());
+// Keep recent successful upstream responses in Vercel's Data Cache.
+// Live readings refresh every five minutes; history refreshes daily.
+async function load(url: string, history = false): Promise<Point[]> {
+  const response = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; EiskanalDashboard/1.0)" },
+    next: { revalidate: history ? 86400 : 300 },
+    signal: AbortSignal.timeout(9000),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}: ${url}`);
+  const parsed = parse(await response.text());
+  if (!parsed.length) throw new Error(`Empty/unparseable table: ${url}`);
+  return parsed;
+}
+// Separate HND host as a fallback if GKD's live table is temporarily unavailable.
+async function loadHndFlow(): Promise<Point[]> {
+  const url = "https://www.hnd.bayern.de/pegel/iller_lech/haunstetten-12003500/abfluss";
+  const response = await fetch(url, { next: { revalidate: 300 }, signal: AbortSignal.timeout(9000) });
+  if (!response.ok) throw new Error(`HND HTTP ${response.status}`);
+  const html = await response.text();
+  const latest = html.match(/Letzter Messwert vom\s*(\d{2}\.\d{2}\.\d{2,4})\s*(\d{2}:\d{2})\s*Uhr:\s*([\d.,]+)\s*m³\/s/i);
+  if (!latest) throw new Error("HND: latest measurement not found");
+  const year = latest[1].split(".")[2];
+  return [{ date: `${latest[1].slice(0, 6)}${year.length === 2 ? "20" + year : year} ${latest[2]}`, value: Number(latest[3].replace(",", ".")) }];
+}
+async function liveWithFallback(url: string, fallback: () => Promise<Point[]>, label: string): Promise<Point[]> {
+  try { return await load(url); }
+  catch (error) {
+    console.warn(`[water-data] ${label}: primary unavailable`, error);
+    return fallback();
+  }
 }
 // Each source is optional: a failed historical table must not hide live readings.
 type LoadResult = PromiseSettledResult<Point[]>;
@@ -107,7 +133,16 @@ export async function GET() {
     `${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle`,
     `${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle${previousYear}`,
   ];
-  const results = await Promise.allSettled(urls.map(load));
+  // Read the two live gauges first; do not launch six uncached requests
+  // simultaneously against the same remote service.
+  const results = await Promise.allSettled([
+    liveWithFallback(urls[0], loadHndFlow, "Abfluss"),
+    load(urls[1], true),
+    load(urls[2], true),
+    liveWithFallback(urls[3], () => load(urls[3].replace("/tabelle", "")), "Wassertemperatur"),
+    load(urls[4], true),
+    load(urls[5], true),
+  ]);
   const [fm, fy, fp, tm, ty, tp] = results.map((result, i) => points(result, urls[i]));
   return NextResponse.json({
     flow: metric(fm, fy, fp, end, "Abfluss Haunstetten"),
