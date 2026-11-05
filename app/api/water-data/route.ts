@@ -1,17 +1,10 @@
 import { NextResponse } from "next/server";
-
+import { parse, instant, resolveLive, metric, fresh, type Point, type Reading } from "@/lib/water";
+import { readCache, saveCache } from "@/lib/water-cache";
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 const BASE = "https://www.gkd.bayern.de/de/fluesse";
-type Point = { date: string; value: number };
 const DAY = 86_400_000;
-const clean = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#160;/g, " ").replace(/\s+/g, " ").trim();
-function parse(html: string): Point[] {
-  return [...html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].flatMap((row) => {
-    const cells = [...row[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((cell) => clean(cell[1]));
-    const date = cells[0]?.match(/\d{2}\.\d{2}\.\d{4}(?:\s+\d{2}:\d{2})?/)?.[0];
-    const raw = cells[1]?.match(/-?\d+(?:[.,]\d+)?/)?.[0];
-    return date && raw ? [{ date, value: Number(raw.replace(",", ".")) }] : [];
-  });
-}
 const formatted = (p: Point) => ({ label: p.date.slice(0, 6), value: p.value, date: p.date });
 // One point per calendar day keeps the rolling window evenly spaced.
 // Historical daily means cover days outside the source's current-month table.
@@ -62,91 +55,49 @@ function weekly(points: Point[]) {
     };
   });
 }
-// Keep recent successful upstream responses in Vercel's Data Cache.
-// Live readings refresh every five minutes; history refreshes daily.
-async function load(url: string, history = false): Promise<Point[]> {
-  const response = await fetch(url, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; EiskanalDashboard/1.0)" },
-    next: { revalidate: history ? 86400 : 300 },
-    signal: AbortSignal.timeout(9000),
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status}: ${url}`);
-  const parsed = parse(await response.text());
-  if (!parsed.length) throw new Error(`Empty/unparseable table: ${url}`);
-  return parsed;
+
+async function html(url:string) {
+  const response=await fetch(url,{cache:"no-store",signal:AbortSignal.timeout(9000),headers:{"User-Agent":"Mozilla/5.0 (compatible; EiskanalDashboard/2.0)"}});
+  if (!response.ok) throw new Error(`Upstream HTTP ${response.status}`);
+  return response.text();
 }
-// Separate HND host as a fallback if GKD's live table is temporarily unavailable.
-async function loadHndFlow(): Promise<Point[]> {
-  const url = "https://www.hnd.bayern.de/pegel/iller_lech/haunstetten-12003500/abfluss";
-  const response = await fetch(url, { next: { revalidate: 300 }, signal: AbortSignal.timeout(9000) });
-  if (!response.ok) throw new Error(`HND HTTP ${response.status}`);
-  const html = await response.text();
-  const latest = html.match(/Letzter Messwert vom\s*(\d{2}\.\d{2}\.\d{2,4})\s*(\d{2}:\d{2})\s*Uhr:\s*([\d.,]+)\s*m³\/s/i);
-  if (!latest) throw new Error("HND: latest measurement not found");
-  const year = latest[1].split(".")[2];
-  return [{ date: `${latest[1].slice(0, 6)}${year.length === 2 ? "20" + year : year} ${latest[2]}`, value: Number(latest[3].replace(",", ".")) }];
-}
-async function liveWithFallback(url: string, fallback: () => Promise<Point[]>, label: string): Promise<Point[]> {
-  try { return await load(url); }
-  catch (error) {
-    console.warn(`[water-data] ${label}: primary unavailable`, error);
-    return fallback();
-  }
-}
-// Each source is optional: a failed historical table must not hide live readings.
-type LoadResult = PromiseSettledResult<Point[]>;
-function points(result: LoadResult, name: string): Point[] {
-  if (result.status === "fulfilled") return result.value;
-  console.error("[water-data] Source unavailable:", name, result.reason);
-  return [];
-}
-function metric(recent: Point[], thisYear: Point[], lastYear: Point[], end: number, name: string) {
-  const history = [...lastYear, ...thisYear];
-  const current = recent[0] ?? null;
-  const past = recent[Math.min(96, recent.length - 1)] ?? null;
-  const parsedDate = current?.date.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
-  const measuredAt = parsedDate ? Date.UTC(Number(parsedDate[3]), Number(parsedDate[2]) - 1, Number(parsedDate[1]), Number(parsedDate[4] ?? 12), Number(parsedDate[5] ?? 0)) - 60 * 60 * 1000 : NaN;
-  const age = Date.now() - measuredAt;
-  // Treat measurements older than 24 hours as unavailable for live decisions.
-  const fresh = Number.isFinite(age) && age >= -60 * 60 * 1000 && age <= 24 * 60 * 60 * 1000;
-  return {
-    current: fresh ? current!.value : null,
-    delta24h: fresh && past ? current!.value - past.value : null,
-    updated: current?.date ?? null,
-    month: rollingMonth(recent, history, end),
-    year: weekly(history),
-    ...(!fresh ? { error: current ? name + " (letzter Messwert veraltet)" : name + " aktuell nicht verfügbar" } : {}),
+export async function GET(request?: Request) {
+  let storageAvailable=true;
+  const cache=await readCache().catch(() => {storageAvailable=false;return [];});
+  const entry=(key:string)=>cache.find(row=>row.cache_key===key);
+  const recent=(key:string,ttl:number)=>{const row=entry(key);return row && Date.now()-Date.parse(row.fetched_at)<ttl ? row : undefined;};
+  const store=async (key:string,payload:unknown,at:string)=>{
+    try {await saveCache(key,payload,at);} catch {storageAvailable=false;}
   };
-}
-export async function GET() {
-  const today = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date());
-  const end = timestamp(today);
-  const year = new Date(end).getUTCFullYear();
-  const startDate = new Date(end - 28 * DAY).toLocaleDateString("de-DE", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" });
-  const monthWindow = `?beginn=${startDate}&ende=${today}`;
-  const previousYear = `?beginn=01.01.${year - 1}&ende=31.12.${year - 1}`;
-  const urls = [
-    `${BASE}/abfluss/bayern/haunstetten-12003500/monatswerte/tabelle${monthWindow}`,
-    `${BASE}/abfluss/bayern/haunstetten-12003500/jahreswerte/tabelle`,
-    `${BASE}/abfluss/bayern/haunstetten-12003500/jahreswerte/tabelle${previousYear}`,
-    `${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/monatswerte/tabelle${monthWindow}`,
-    `${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle`,
-    `${BASE}/wassertemperatur/bayern/augsburg-hochablass-12004002/jahreswerte/tabelle${previousYear}`,
-  ];
-  // Read the two live gauges first; do not launch six uncached requests
-  // simultaneously against the same remote service.
-  const results = await Promise.allSettled([
-    liveWithFallback(urls[0], loadHndFlow, "Abfluss"),
-    load(urls[1], true),
-    load(urls[2], true),
-    liveWithFallback(urls[3], () => load(urls[3].replace("/tabelle", "")), "Wassertemperatur"),
-    load(urls[4], true),
-    load(urls[5], true),
-  ]);
-  const [fm, fy, fp, tm, ty, tp] = results.map((result, i) => points(result, urls[i]));
-  return NextResponse.json({
-    flow: metric(fm, fy, fp, end, "Abfluss Haunstetten"),
-    temp: metric(tm, ty, tp, end, "Wassertemperatur Hochablass"),
-    source: "Gewässerkundlicher Dienst Bayern (LfU)",
-  }, { headers: { "Cache-Control": "public, max-age=300, s-maxage=300" } });
+  if (request && new URL(request.url).searchParams.get('history')==='1') {
+    const today = new Intl.DateTimeFormat("de-DE", {timeZone:"Europe/Berlin"}).format(new Date());
+    const end=timestamp(today), year=new Date(end).getUTCFullYear();
+    const start=new Date(end-28*DAY).toLocaleDateString('de-DE',{timeZone:'UTC',day:'2-digit',month:'2-digit',year:'numeric'});
+    const history=await Promise.all((['flow','temp'] as const).map(async kind=>{
+      const key='history-'+kind;
+      const saved=recent(key,DAY);
+      if(saved) return [kind,saved.payload];
+      const path=kind==='flow'?'abfluss/bayern/haunstetten-12003500':'wassertemperatur/kelheim/augsburg-hochablass-12004002';
+      const urls=[`${BASE}/${path}/monatswerte/tabelle?beginn=${start}&ende=${today}`,`${BASE}/${path}/jahreswerte/tabelle`,`${BASE}/${path}/jahreswerte/tabelle?beginn=01.01.${year-1}&ende=31.12.${year-1}`];
+      const tables=await Promise.allSettled(urls.map(async url=>{const p=parse(await html(url));if(!p.length)throw new Error('Empty history');return p;}));
+      const rows=tables.map(r=>r.status==='fulfilled'?r.value:[]);
+      const old=entry(key)?.payload as {month:unknown[];year:unknown[]}|undefined;
+      const data={month:rollingMonth(rows[0],[...rows[2],...rows[1]],end),year:weekly([...rows[2],...rows[1]])};
+      if(!data.month.length && old) data.month=old.month as typeof data.month;
+      if(!data.year.length && old) data.year=old.year as typeof data.year;
+      if(tables.every(r=>r.status==='fulfilled')) await store(key,data,new Date().toISOString());
+      return [kind,data];
+    }));
+    return NextResponse.json({history:Object.fromEntries(history),storageAvailable},{headers:{'Cache-Control':'no-store'}});
+  }
+  const results=await Promise.all((['flow','temp'] as const).map(async kind=>{
+    const key='live-'+kind;
+    const saved=entry(key)?.payload as Reading|undefined;
+    // Reuse only recently confirmed, fresh successful measurements.
+    if(saved && recent(key,300000) && fresh(saved)) return metric({reading:saved,stale:false,delta24h:null});
+    const result=await resolveLive(kind,saved,html);
+    if(result.reading && !result.stale) await store(key,result.reading,result.reading.measuredAt);
+    return metric(result);
+  }));
+  return NextResponse.json({flow:results[0],temp:results[1],source:'LfU Bayern · HND / NID; Ersatz: GKD',storageAvailable},{headers:{'Cache-Control':'no-store'}});
 }

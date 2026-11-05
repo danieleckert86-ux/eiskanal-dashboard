@@ -20,7 +20,7 @@ async function initialWater(): Promise<WaterData | null> {
 
 async function initialWeather(): Promise<WeatherData | null> {
   try {
-    const response = await fetch(WEATHER_URL, { next: { revalidate: 300 } });
+    const response = await fetch(WEATHER_URL, { next: { revalidate: 300 }, signal: AbortSignal.timeout(6000) });
     if (!response.ok) return null;
     return await response.json() as WeatherData;
   } catch (error) {
