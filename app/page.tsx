@@ -31,5 +31,5 @@ async function initialWeather(): Promise<WeatherData | null> {
 
 export default async function Home() {
   const [water, weather] = await Promise.all([initialWater(), initialWeather()]);
-  return <DashboardClient initialWater={water} initialWeather={weather} />;
+  return <DashboardClient initialWater={water} initialWeather={weather} initialNow={Date.now()} />;
 }
